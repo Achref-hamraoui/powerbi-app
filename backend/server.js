@@ -3,6 +3,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const path = require('path');
 const app = express();
+const User = require('./models/User'); // adapte le chemin selon ton projet
 
 // Middleware
 app.use(bodyParser.json());
@@ -15,9 +16,11 @@ app.use(session({
 }));
 
 // Utilisateurs autorisés
-const USERS = [
-  { username: 'admin@mail.com', password: '123456' }
-];
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb+srv://achrefhamraoui:08KFs48Fo5c5NRNh@achref.hqkekrr.mongodb.net/powerbi-app?retryWrites=true&w=majority')
+  .then(() => console.log('✅ Connecté à MongoDB Atlas'))
+  .catch(err => console.error('❌ Erreur MongoDB :', err));
 
 // 🔐 Authentification
 app.post('/api/login', (req, res) => {
