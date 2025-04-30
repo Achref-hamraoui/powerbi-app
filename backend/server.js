@@ -2,10 +2,12 @@ const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const path = require('path');
-const app = express();
-const User = require('./models/User'); // adapte le chemin selon ton projet
+const mongoose = require('mongoose');
+const User = require('./models/User'); // Le modèle User (schéma mongoose)
 
-// Middleware
+const app = express();
+
+// 📦 Middleware
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 app.use(session({
@@ -15,26 +17,30 @@ app.use(session({
   cookie: { secure: false } // true si HTTPS
 }));
 
-// Utilisateurs autorisés
-const mongoose = require('mongoose');
-
+// 🌐 Connexion MongoDB Atlas
 mongoose.connect('mongodb+srv://achrefhamraoui:08KFs48Fo5c5NRNh@achref.hqkekrr.mongodb.net/powerbi-app?retryWrites=true&w=majority')
   .then(() => console.log('✅ Connecté à MongoDB Atlas'))
   .catch(err => console.error('❌ Erreur MongoDB :', err));
 
-// 🔐 Authentification
-app.post('/api/login', (req, res) => {
+// 🔐 Route de connexion (login)
+app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
-  const user = USERS.find(u => u.username === username && u.password === password);
-  if (user) {
-    req.session.user = user;
-    res.sendStatus(200);
-  } else {
-    res.sendStatus(401);
+
+  try {
+    const user = await User.findOne({ email: username, password: password });
+    if (user) {
+      req.session.user = user;
+      res.sendStatus(200);
+    } else {
+      res.status(401).send('Identifiants incorrects');
+    }
+  } catch (err) {
+    console.error('❌ Erreur login :', err);
+    res.sendStatus(500);
   }
 });
 
-// Middleware de protection
+// 🔒 Middleware de protection de route
 function requireAuth(req, res, next) {
   if (req.session.user) {
     next();
@@ -43,23 +49,21 @@ function requireAuth(req, res, next) {
   }
 }
 
-// Accès protégé à dashboard.html
+// 📊 Accès protégé à dashboard.html
 app.get('/dashboard.html', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/dashboard.html'));
 });
 
-// Simulation de Power BI Token
+// 🪪 Simulation de Power BI token (à remplacer par vrai système si nécessaire)
 app.get('/api/powerbi-token', requireAuth, (req, res) => {
-  // Remplace ces valeurs par les vrais si tu as un rapport Power BI
-  const token = 'TOKEN_FAKE'; // à générer via Azure AD
+  const token = 'TOKEN_FAKE';
   const embedUrl = 'https://app.powerbi.com/reportEmbed?reportId=TON_ID';
   const reportId = 'TON_ID';
   res.json({ token, embedUrl, reportId });
 });
 
-// Lancement
+// 🚀 Lancement du serveur
 const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Serveur en ligne sur http://localhost:${PORT}`);
+  console.log(`✅ Serveur en ligne : http://localhost:${PORT}`);
 });
-
