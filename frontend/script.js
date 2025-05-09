@@ -1,5 +1,12 @@
 document.addEventListener("DOMContentLoaded", async () => {
     try {
+        // Wait for Power BI to be loaded
+        if (!window['powerbi']) {
+            console.error("❌ Power BI library not loaded");
+            document.getElementById('reportContainer').innerText = 'Erreur : Power BI library not loaded.';
+            return;
+        }
+
         const res = await fetch('/api/powerbi-token');
         if (!res.ok) {
             document.getElementById('reportContainer').innerText = 'Erreur de chargement du rapport (API non disponible).';
@@ -14,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             id: data.reportId,
             embedUrl: data.embedUrl,
             accessToken: data.token || '',
-            tokenType: window['powerbi-client'].models.TokenType.Embed,
+            tokenType: window['powerbi'].models.TokenType.Embed,
             settings: {
                 panes: {
                     filters: { visible: false },
@@ -24,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
 
         const reportContainer = document.getElementById('reportContainer');
-        const powerbiService = new window['powerbi-client'].service.Service(window['powerbi-client'].factories.createEmbedConfigService());
+        const powerbiService = new window['powerbi'].service.Service(window['powerbi'].factories.createEmbedConfigService());
         const report = powerbiService.embed(reportContainer, embedConfig);
 
         report.on("loaded", function() {
