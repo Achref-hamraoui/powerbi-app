@@ -22,47 +22,6 @@
 <body>
     <h2>Rapport Power BI</h2>
     <div id="reportContainer">Chargement du rapport Power BI...</div>
-
-    <script>
-        (async () => {
-            try {
-                const res = await fetch('/api/powerbi-token');
-                if (!res.ok) {
-                    document.getElementById('reportContainer').innerText = 'Erreur de chargement du rapport (API non disponible).';
-                    return;
-                }
-
-                const data = await res.json();
-
-                const embedConfig = {
-                    type: 'report',
-                    embedUrl: "https://app.powerbi.com/view?r=eyJrIjoiMzNjMmIzNjQtYTFkMC00ZmRkLTg1M2MtY2FlZGM3NTQ2ZWU3IiwidCI6ImRiZDY2NjRkLTRlYjktNDZlYi05OWQ4LTVjNDNiYTE1M2M2MSIsImMiOjl9",
-                    accessToken: data.token || '',
-                    tokenType: window.powerbi.models.TokenType.Embed,
-                    settings: {
-                        panes: {
-                            filters: { visible: false },
-                            pageNavigation: { visible: true }
-                        }
-                    }
-                };
-
-                const reportContainer = document.getElementById('reportContainer');
-                const powerbiService = new window.powerbi.service.Service(window.powerbi.factories.createEmbedConfigService());
-                const report = powerbiService.embed(reportContainer, embedConfig);
-
-                report.on("loaded", function() {
-                    console.log("Power BI Report Loaded");
-                });
-
-                report.on("error", function(event) {
-                    document.getElementById('reportContainer').innerText = 'Erreur : ' + event.detail.message;
-                });
-
-            } catch (error) {
-                document.getElementById('reportContainer').innerText = 'Erreur : ' + error.message;
-            }
-        })();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
