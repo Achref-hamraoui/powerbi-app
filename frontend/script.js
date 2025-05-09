@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
 
         const reportContainer = document.getElementById('reportContainer');
-        const powerbiService = new window['powerbi'].service.Service(window['powerbi'].factories.createEmbedConfigService());
+        const powerbiService = new window['powerbi-client'].service.Service(window['powerbi-client'].factories.createEmbedConfigService());
         const report = powerbiService.embed(reportContainer, embedConfig);
 
         report.on("loaded", function() {
