@@ -1,11 +1,20 @@
 document.addEventListener("DOMContentLoaded", async () => {
     try {
-        // Wait for Power BI to be loaded
-        if (!window['powerbi']) {
-            console.error("❌ Power BI library not loaded");
-            document.getElementById('reportContainer').innerText = 'Erreur : Power BI library not loaded.';
-            return;
-        }
+        // Wait for Power BI library to be loaded
+        await new Promise((resolve, reject) => {
+            const interval = setInterval(() => {
+                if (window.powerbi) {
+                    clearInterval(interval);
+                    resolve();
+                }
+            }, 100);
+            setTimeout(() => {
+                clearInterval(interval);
+                reject("Power BI library failed to load.");
+            }, 5000); // 5 seconds timeout
+        });
+
+        console.log("✅ Power BI library loaded.");
 
         const res = await fetch('/api/powerbi-token');
         if (!res.ok) {
@@ -14,14 +23,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const data = await res.json();
-        console.log(data); // Debugging
+        console.log("✅ Power BI Token Data:", data);
 
         const embedConfig = {
             type: 'report',
             id: data.reportId,
             embedUrl: data.embedUrl,
             accessToken: data.token || '',
-            tokenType: window['powerbi'].models.TokenType.Embed,
+            tokenType: window.powerbi.models.TokenType.Embed,
             settings: {
                 panes: {
                     filters: { visible: false },
@@ -31,8 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
 
         const reportContainer = document.getElementById('reportContainer');
-        const powerbiService = new window['powerbi'].service.Service(window['powerbi'].factories.createEmbedConfigService());
-        const report = powerbiService.embed(reportContainer, embedConfig);
+        const report = window.powerbi.embed(reportContainer, embedConfig);
 
         report.on("loaded", function() {
             console.log("✅ Power BI Report Loaded");
@@ -46,6 +54,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     } catch (error) {
         console.error('❌ Error loading Power BI report:', error);
-        document.getElementById('reportContainer').innerText = 'Erreur : ' + error.message;
+        document.getElementById('reportContainer').innerText = 'Erreur : ' + error;
     }
 });
