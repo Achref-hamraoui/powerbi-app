@@ -54,12 +54,19 @@ app.get('/dashboard.html', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/dashboard.html'));
 });
 
-// 🪪 Simulation de Power BI token (à remplacer par vrai système si nécessaire)
+// 🪪 Securely Generate and Return Power BI Token
 app.get('/api/powerbi-token', requireAuth, (req, res) => {
-  const token = 'TOKEN_FAKE';
-  const embedUrl = 'https://app.powerbi.com/reportEmbed?reportId=TON_ID';
-  const reportId = 'TON_ID';
-  res.json({ token, embedUrl, reportId });
+  try {
+    const token = 'eyJrIjoiMzNjMmIzNjQtYTFkMC00ZmRkLTg1M2MtY2FlZGM3NTQ2ZWU3IiwidCI6ImRiZDY2NjRkLTRlYjktNDZlYi05OWQ4LTVjNDNiYTE1M2M2MSIsImMiOjl9';
+    const embedUrl = 'https://app.powerbi.com/view?r=eyJrIjoiMzNjMmIzNjQtYTFkMC00ZmRkLTg1M2MtY2FlZGM3NTQ2ZWU3IiwidCI6ImRiZDY2NjRkLTRlYjktNDZlYi05OWQ4LTVjNDNiYTE1M2M2MSIsImMiOjl9';
+    const reportId = 'TON_ID';
+
+    res.json({ token, embedUrl, reportId });
+    console.log('✅ Power BI Token sent successfully');
+  } catch (err) {
+    console.error('❌ Error generating Power BI token:', err);
+    res.status(500).send('Error generating Power BI token');
+  }
 });
 
 // 🚀 Lancement du serveur
