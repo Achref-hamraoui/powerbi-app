@@ -8,10 +8,35 @@
 </head>
 <body>
     <h2>Rapport Power BI</h2>
-    <div id="reportContainer" style="height: 80vh;"></div>
+    <div id="reportContainer" style="height: 80vh; width: 100%;"></div>
 
-    <script src="script.js"></script>
+    <script>
+        (async () => {
+            const res = await fetch('/api/powerbi-token');
+
+            if (!res.ok) {
+                document.getElementById('reportContainer').innerText = 'Erreur de chargement du rapport.';
+                return;
+            }
+
+            const data = await res.json();
+
+            const embedConfig = {
+                type: 'report',
+                embedUrl: "https://app.powerbi.com/view?r=eyJrIjoiMzNjMmIzNjQtYTFkMC00ZmRkLTg1M2MtY2FlZGM3NTQ2ZWU3IiwidCI6ImRiZDY2NjRkLTRlYjktNDZlYi05OWQ4LTVjNDNiYTE1M2M2MSIsImMiOjl9",
+                accessToken: data.token || '',
+                tokenType: window.powerbi.models.TokenType.Embed,
+                settings: {
+                    panes: {
+                        filters: { visible: false },
+                        pageNavigation: { visible: true }
+                    }
+                }
+            };
+
+            const reportContainer = document.getElementById('reportContainer');
+            powerbi.embed(reportContainer, embedConfig);
+        })();
+    </script>
 </body>
 </html>
-<!--       if (res.ok) {    
- -->
